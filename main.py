@@ -712,9 +712,6 @@ def learning_style_test():
         with col2:
             cedula = st.text_input("Número de Cédula", key="cedula_learning")
         
-        # Verificar que todos los campos estén completos
-        all_fields_filled = (nombre is not None and nombre.strip() != "") and (edad is not None and edad > 0) and (cedula is not None and cedula.strip() != "")
-        
         # Botón de envío único
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -726,7 +723,7 @@ def learning_style_test():
             )
     
     # Procesar resultados y enviar correo
-    if submitted and all_fields_filled:
+    if submitted:
         st.success("✅ ¡Test enviado exitosamente! Procesando resultados...")
         
         # Calcular puntuaciones
@@ -752,6 +749,123 @@ def learning_style_test():
             'edad': edad,
             'cedula': cedula
         }
+        
+        # Mostrar resultados al usuario (igual que en el correo)
+        st.markdown("""
+        <div class="results-card">
+            <h2>📊 Resultados del Test de Estilos de Aprendizaje</h2>
+            <p>Análisis de preferencias de aprendizaje</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Información del participante
+        st.markdown("""
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+            <h3>📋 Información del Participante</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.write(f"**Nombre:** {user_data['nombre']}")
+        with col2:
+            st.write(f"**Edad:** {user_data['edad']} años")
+        with col3:
+            st.write(f"**Cédula:** {user_data['cedula']}")
+        
+        # Resultados en tarjetas
+        st.subheader("📊 Puntuaciones por Categoría")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <h3>👁️ Visual</h3>
+                <h2 style="color: #FF6B6B; font-size: 2.5rem;">{scores['visual']}</h2>
+                <p style="font-size: 1.2rem; color: #666;">{percentages['visual']:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <h3>👂 Auditivo</h3>
+                <h2 style="color: #4ECDC4; font-size: 2.5rem;">{scores['auditory']}</h2>
+                <p style="font-size: 1.2rem; color: #666;">{percentages['auditory']:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <h3>🤲 Kinestésico</h3>
+                <h2 style="color: #45B7D1; font-size: 2.5rem;">{scores['kinesthetic']}</h2>
+                <p style="font-size: 1.2rem; color: #666;">{percentages['kinesthetic']:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Puntuación total
+        st.markdown(f"""
+        <div style="text-align: center; margin: 2rem 0;">
+            <h3>🎯 Puntuación Total</h3>
+            <h2 style="color: #667eea; font-size: 3rem;">{total_score}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Mostrar gráficos
+        st.subheader("📊 Gráficos de Resultados")
+        st.pyplot(fig)
+        
+        # Información sobre adjunto
+        st.markdown("""
+        <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
+            <h3>📎 Gráficos Adjuntos en el Correo</h3>
+            <p>Se ha adjuntado un archivo PNG con los gráficos detallados de tus resultados, incluyendo:</p>
+            <ul>
+                <li>📊 Puntuaciones totales por categoría</li>
+                <li>📈 Porcentajes de cada estilo de aprendizaje</li>
+                <li>🎯 Visualización completa de tus preferencias</li>
+            </ul>
+            <p><strong>Nombre del archivo:</strong> resultados_Estilos_de_Aprendizaje_{user_data['nombre'].replace(' ', '_')}.png</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Interpretación
+        st.subheader("🎯 Interpretación de Resultados")
+        interpretations = {
+            'visual': """
+            **👁️ Tu estilo de aprendizaje predominante es VISUAL**
+            
+            Te beneficias especialmente de:
+            • 📊 Imágenes, diagramas y gráficos
+            • 📝 Material escrito y notas
+            • 🎨 Colores y mapas mentales
+            • 📖 Lectura y visualización
+            • 🖼️ Videos y presentaciones visuales
+            """,
+            'auditory': """
+            **👂 Tu estilo de aprendizaje predominante es AUDITIVO**
+            
+            Te beneficias especialmente de:
+            • 🎧 Escuchar explicaciones y conferencias
+            • 💬 Discusiones y debates
+            • 🎵 Música y ritmos
+            • 🗣️ Explicar conceptos en voz alta
+            • 📻 Podcasts y grabaciones
+            """,
+            'kinesthetic': """
+            **🤲 Tu estilo de aprendizaje predominante es KINESTÉSICO**
+            
+            Te beneficias especialmente de:
+            • 🏃‍♂️ Actividades prácticas y experimentos
+            • 🎭 Role-playing y simulaciones
+            • ✋ Manipulación de objetos
+            • 🚶‍♂️ Movimiento mientras aprendes
+            • 🔬 Experiencia directa y hands-on
+            """
+        }
+        
+        st.info(interpretations[max_category])
         
         # Enviar correo
         with st.spinner("Enviando resultados por correo..."):
@@ -831,9 +945,6 @@ def hemisphere_test():
         with col2:
             cedula = st.text_input("Número de Cédula", key="cedula_hemisphere")
         
-        # Verificar que todos los campos estén completos
-        all_fields_filled = (nombre is not None and nombre.strip() != "") and (edad is not None and edad > 0) and (cedula is not None and cedula.strip() != "")
-        
         # Botón de envío único
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -845,7 +956,7 @@ def hemisphere_test():
             )
     
     # Procesar resultados y enviar correo
-    if submitted and all_fields_filled:
+    if submitted:
         st.success("✅ ¡Test enviado exitosamente! Procesando resultados...")
         
         # Calcular puntuaciones
@@ -878,6 +989,107 @@ def hemisphere_test():
             'edad': edad,
             'cedula': cedula
         }
+        
+        # Mostrar resultados al usuario (igual que en el correo)
+        st.markdown("""
+        <div class="results-card">
+            <h2>🧠 Resultados del Test de Hemisferios Cerebrales</h2>
+            <p>Análisis de predominancia cerebral</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Información del participante
+        st.markdown("""
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+            <h3>📋 Información del Participante</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.write(f"**Nombre:** {user_data['nombre']}")
+        with col2:
+            st.write(f"**Edad:** {user_data['edad']} años")
+        with col3:
+            st.write(f"**Cédula:** {user_data['cedula']}")
+        
+        # Resultados en tarjetas
+        st.subheader("📊 Resultados por Hemisferio")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <h3>⚖️ Hemisferio Izquierdo</h3>
+                <h2 style="color: #FF6B6B; font-size: 2.5rem;">{left_count}</h2>
+                <p style="font-size: 1.2rem; color: #666;">{(left_count/total_questions)*100:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <h3>🎨 Hemisferio Derecho</h3>
+                <h2 style="color: #4ECDC4; font-size: 2.5rem;">{right_count}</h2>
+                <p style="font-size: 1.2rem; color: #666;">{(right_count/total_questions)*100:.1f}%</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Mostrar gráficos
+        st.subheader("📊 Gráficos de Resultados")
+        st.pyplot(fig)
+        
+        # Información sobre adjunto
+        st.markdown("""
+        <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
+            <h3>📎 Gráficos Adjuntos en el Correo</h3>
+            <p>Se ha adjuntado un archivo PNG con los gráficos detallados de tus resultados, incluyendo:</p>
+            <ul>
+                <li>🥧 Gráfico de pastel de distribución de hemisferios</li>
+                <li>📊 Gráfico de barras con conteo de respuestas</li>
+                <li>🎯 Visualización completa de tu predominancia cerebral</li>
+            </ul>
+            <p><strong>Nombre del archivo:</strong> resultados_Hemisferios_Cerebrales_{user_data['nombre'].replace(' ', '_')}.png</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Interpretación
+        st.subheader("🎯 Interpretación de Resultados")
+        if left_count > right_count:
+            st.info("""
+            **⚖️ Tu hemisferio IZQUIERDO es predominante**
+            
+            Características de tu pensamiento:
+            • 📊 Lógico y analítico
+            • 📝 Secuencial y ordenado
+            • 🔢 Matemático y preciso
+            • 📋 Planificador y organizado
+            • 🎯 Orientado a detalles
+            • 💭 Razonamiento verbal
+            """)
+        elif right_count > left_count:
+            st.info("""
+            **🎨 Tu hemisferio DERECHO es predominante**
+            
+            Características de tu pensamiento:
+            • 🎨 Creativo e intuitivo
+            • 🎵 Musical y artístico
+            • 🌟 Holístico y global
+            • 🎭 Emocional y expresivo
+            • 🎪 Flexible y espontáneo
+            • 🎨 Pensamiento visual
+            """)
+        else:
+            st.info("""
+            **⚖️🎨 Tienes un EQUILIBRIO entre ambos hemisferios**
+            
+            Características de tu pensamiento:
+            • 🔄 Versátil y adaptable
+            • 🎯 Puedes alternar entre lógica y creatividad
+            • 🌟 Aprovechas lo mejor de ambos hemisferios
+            • 🎪 Flexible en diferentes situaciones
+            • 🎨 Capacidad de síntesis única
+            """)
         
         # Enviar correo
         with st.spinner("Enviando resultados por correo..."):
